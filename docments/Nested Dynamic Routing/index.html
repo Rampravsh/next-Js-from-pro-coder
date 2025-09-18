@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Next.js Route Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Warm Neutral (Stone, White, Sky) -->
+    <!-- Application Structure Plan: The application is structured as an interactive learning tool, rather than a static report. It's divided into three logical sections: a hands-on "Route Visualizer" for basic and advanced routes, followed by a "Key Concepts" summary. This structure was chosen to promote active learning over passive reading. Users first interact with the core concepts in a sandboxed environment to build intuition, and then review the formal definitions. This flow directly connects the abstract file structure to the concrete URL and params object, which is the most critical learning objective. -->
+    <!-- Visualization & Content Choices: Report Info -> Goal -> Viz/Presentation Method -> Interaction -> Justification -> Library/Method. 1. Route Mapping Tables -> Goal: Teach the mapping from file path to URL and params -> Viz: Interactive route builder with live text inputs and code block outputs -> Interaction: User selects a route template and types in values for dynamic segments; the URL and params update in real-time. -> Justification: This provides immediate feedback and makes the abstract concept tangible, which is far more effective for learning than a static table. -> Method: Vanilla JS DOM manipulation. 2. Conceptual Explanations -> Goal: Provide clear, static definitions -> Viz: Styled content cards -> Interaction: None -> Justification: Cards visually separate concepts for easy scanning and reference after the interactive portion. -> Method: HTML/Tailwind CSS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap");
+      .font-mono {
+        font-family: "Roboto Mono", monospace;
+      }
+      .tab.active {
+        border-color: #0ea5e9;
+        color: #0284c7;
+        background-color: #e0f2fe;
+      }
+    </style>
+  </head>
+  <body class="bg-stone-50 text-stone-800">
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+      <header class="text-center mb-10">
+        <h1 class="text-3xl md:text-4xl font-bold text-stone-900">
+          Interactive Next.js Route Visualizer
+        </h1>
+        <p class="mt-2 text-lg text-stone-600">
+          Understand nested dynamic routing by seeing it in action.
+        </p>
+      </header>
+
+      <main>
+        <section
+          id="visualizer"
+          class="bg-white p-6 rounded-2xl shadow-lg border border-stone-200"
+        >
+          <div class="mb-6">
+            <p class="text-stone-700 leading-relaxed text-center">
+              This tool demonstrates how Next.js's file-system based router maps
+              your folder structure to URL paths. Select a route pattern, fill
+              in the dynamic segments, and watch the URL and `params` object
+              update instantly.
+            </p>
+          </div>
+
+          <div class="border-b border-stone-200 mb-6">
+            <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+              <button
+                id="tab-basic"
+                class="tab active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+              >
+                Basic & Nested Routes
+              </button>
+              <button
+                id="tab-catchall"
+                class="tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-stone-500 hover:text-stone-700 hover:border-stone-300"
+              >
+                Catch-All Routes
+              </button>
+            </nav>
+          </div>
+
+          <div id="route-selector-container" class="mb-6">
+            <label
+              for="route-selector"
+              class="block text-sm font-medium text-stone-700 mb-2"
+              >Select a File Path Structure:</label
+            >
+            <select
+              id="route-selector"
+              class="w-full p-2 border border-stone-300 rounded-md bg-stone-50 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition"
+            ></select>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-6 items-start">
+            <div>
+              <h3 class="font-semibold text-stone-800 mb-2">
+                1. Define Segments
+              </h3>
+              <div
+                id="inputs-container"
+                class="space-y-4 p-4 bg-stone-100 rounded-lg border border-stone-200"
+              ></div>
+            </div>
+            <div>
+              <h3 class="font-semibold text-stone-800 mb-2">2. See Result</h3>
+              <div
+                class="p-4 bg-gray-800 text-white rounded-lg space-y-4 font-mono text-sm"
+              >
+                <div>
+                  <label class="text-xs text-gray-400 block mb-1"
+                    >Resulting URL Path:</label
+                  >
+                  <div
+                    id="output-url"
+                    class="bg-gray-900 p-3 rounded break-words"
+                  ></div>
+                </div>
+                <div>
+                  <label class="text-xs text-gray-400 block mb-1"
+                    >Parameters Object:</label
+                  >
+                  <pre
+                    id="output-params"
+                    class="bg-gray-900 p-3 rounded whitespace-pre-wrap break-words"
+                  ></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="key-concepts" class="mt-12">
+          <h2 class="text-2xl font-bold text-center mb-8 text-stone-900">
+            Key Concepts at a Glance
+          </h2>
+          <div class="text-center mb-8 max-w-3xl mx-auto">
+            <p class="text-stone-700 leading-relaxed">
+              These are the fundamental building blocks of dynamic routing in
+              Next.js. The visualizer above provides a practical demonstration
+              of how these concepts are applied to generate pages based on URL
+              parameters.
+            </p>
+          </div>
+          <div class="grid md:grid-cols-3 gap-6">
+            <div
+              class="bg-white p-6 rounded-xl shadow-md border border-stone-200"
+            >
+              <h3 class="font-bold text-lg text-sky-700 mb-2">
+                Dynamic Segments
+              </h3>
+              <p
+                class="font-mono text-sm bg-stone-100 text-stone-800 p-2 rounded mb-3 inline-block"
+              >
+                [folderName]
+              </p>
+              <p class="text-stone-600">
+                Matches any single path segment. The value is passed as a string
+                in the `params` object.
+              </p>
+              <p class="font-mono text-xs mt-3 text-stone-500">
+                e.g., `app/blog/[slug]` matches `/blog/hello-world`
+              </p>
+            </div>
+            <div
+              class="bg-white p-6 rounded-xl shadow-md border border-stone-200"
+            >
+              <h3 class="font-bold text-lg text-sky-700 mb-2">
+                Catch-all Segments
+              </h3>
+              <p
+                class="font-mono text-sm bg-stone-100 text-stone-800 p-2 rounded mb-3 inline-block"
+              >
+                [...folderName]
+              </p>
+              <p class="text-stone-600">
+                Matches any number of path segments. The values are passed as an
+                array of strings in the `params` object.
+              </p>
+              <p class="font-mono text-xs mt-3 text-stone-500">
+                e.g., `app/shop/[...filters]` matches `/shop/shoes/nike`
+              </p>
+            </div>
+            <div
+              class="bg-white p-6 rounded-xl shadow-md border border-stone-200"
+            >
+              <h3 class="font-bold text-lg text-sky-700 mb-2">
+                Optional Catch-all
+              </h3>
+              <p
+                class="font-mono text-sm bg-stone-100 text-stone-800 p-2 rounded mb-3 inline-block"
+              >
+                [[...folderName]]
+              </p>
+              <p class="text-stone-600">
+                The same as catch-all, but also matches the route without any
+                segments. If no segments are present, `params` will be empty.
+              </p>
+              <p class="font-mono text-xs mt-3 text-stone-500">
+                e.g., `app/docs/[[...slug]]` matches `/docs` and `/docs/intro`
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="text-center mt-12 pt-6 border-t border-stone-200">
+        <p class="text-sm text-stone-500">
+          An interactive guide to Next.js routing concepts.
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const routes = {
+          basic: [
+            {
+              path: "app/blog/[slug]/page.js",
+              segments: ["slug"],
+              placeholders: ["my-first-post"],
+            },
+            {
+              path: "app/[username]/settings/page.js",
+              segments: ["username"],
+              placeholders: ["johndoe"],
+            },
+            {
+              path: "app/products/[category]/[id]/page.js",
+              segments: ["category", "id"],
+              placeholders: ["electronics", "123"],
+            },
+          ],
+          catchall: [
+            {
+              path: "app/docs/[...slug]/page.js",
+              segments: ["slug"],
+              type: "catchall",
+              placeholders: ["concepts/nextjs/routing"],
+            },
+            {
+              path: "app/files/[[...path]]/page.js",
+              segments: ["path"],
+              type: "optional_catchall",
+              placeholders: ["folder/subfolder/file.txt"],
+            },
+          ],
+        };
+
+        const routeSelector = document.getElementById("route-selector");
+        const inputsContainer = document.getElementById("inputs-container");
+        const outputUrl = document.getElementById("output-url");
+        const outputParams = document.getElementById("output-params");
+        const tabBasic = document.getElementById("tab-basic");
+        const tabCatchAll = document.getElementById("tab-catchall");
+
+        let currentRouteType = "basic";
+
+        function populateSelector(routeType) {
+          routeSelector.innerHTML = "";
+          routes[routeType].forEach((route, index) => {
+            const option = document.createElement("option");
+            option.value = index;
+            option.textContent = route.path;
+            routeSelector.appendChild(option);
+          });
+          routeSelector.dispatchEvent(new Event("change"));
+        }
+
+        function updateVisualizer() {
+          const selectedRouteIndex = routeSelector.value;
+          const route = routes[currentRouteType][selectedRouteIndex];
+          if (!route) return;
+
+          const inputElements = inputsContainer.querySelectorAll("input");
+          let url = route.path.split("/page.js")[0].replace("app", "");
+          let params = {};
+
+          if (route.type === "catchall" || route.type === "optional_catchall") {
+            const value = inputElements[0].value;
+            const segments = value.split("/").filter((s) => s);
+            url = url.replace(/\[\.\.\..*\]/, value);
+            params[route.segments[0]] = segments;
+            if (route.type === "optional_catchall" && value === "") {
+              delete params[route.segments[0]];
+            }
+          } else {
+            route.segments.forEach((segment, index) => {
+              const value =
+                inputElements[index].value || route.placeholders[index];
+              url = url.replace(`[${segment}]`, value);
+              params[segment] = value;
+            });
+          }
+
+          outputUrl.textContent = url || "/";
+          outputParams.textContent = JSON.stringify(params, null, 2);
+        }
+
+        function createInputs() {
+          const selectedRouteIndex = routeSelector.value;
+          const route = routes[currentRouteType][selectedRouteIndex];
+          if (!route) return;
+
+          inputsContainer.innerHTML = "";
+
+          if (route.type === "catchall" || route.type === "optional_catchall") {
+            const segment = route.segments[0];
+            const isOptional = route.type === "optional_catchall";
+            const div = document.createElement("div");
+            const label = document.createElement("label");
+            label.htmlFor = segment;
+            label.className = "block text-sm font-medium text-stone-600 mb-1";
+            label.textContent = `${segment} (use / for multiple segments)`;
+            const input = document.createElement("input");
+            input.type = "text";
+            input.id = segment;
+            input.placeholder = route.placeholders[0];
+            input.className =
+              "w-full p-2 border border-stone-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition";
+            div.appendChild(label);
+            div.appendChild(input);
+            inputsContainer.appendChild(div);
+          } else {
+            route.segments.forEach((segment, index) => {
+              const div = document.createElement("div");
+              const label = document.createElement("label");
+              label.htmlFor = segment;
+              label.className = "block text-sm font-medium text-stone-600 mb-1";
+              label.textContent = segment;
+              const input = document.createElement("input");
+              input.type = "text";
+              input.id = segment;
+              input.placeholder = route.placeholders[index];
+              input.className =
+                "w-full p-2 border border-stone-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition";
+              div.appendChild(label);
+              div.appendChild(input);
+              inputsContainer.appendChild(div);
+            });
+          }
+
+          inputsContainer.querySelectorAll("input").forEach((input) => {
+            input.addEventListener("input", updateVisualizer);
+          });
+
+          updateVisualizer();
+        }
+
+        routeSelector.addEventListener("change", createInputs);
+
+        tabBasic.addEventListener("click", () => {
+          currentRouteType = "basic";
+          tabBasic.classList.add("active");
+          tabCatchAll.classList.remove("active");
+          populateSelector(currentRouteType);
+        });
+
+        tabCatchAll.addEventListener("click", () => {
+          currentRouteType = "catchall";
+          tabCatchAll.classList.add("active");
+          tabBasic.classList.remove("active");
+          populateSelector(currentRouteType);
+        });
+
+        populateSelector(currentRouteType);
+      });
+    </script>
+  </body>
+</html>

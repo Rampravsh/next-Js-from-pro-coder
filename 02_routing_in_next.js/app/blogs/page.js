@@ -5,13 +5,18 @@ export default async function BlogsPage() {
     { id: 2, title: "My Second Blog" },
   ];
   return (
-    <div>
+    <div className="p-10">
       <h1 className="text-3xl font-bold underline">Blogs Page</h1>
       <p>This is the blogs page</p>
       <ul>
         {blogs.map((blog) => (
           <li key={blog.id}>
-            <Link href={`/blogs/${blog.id}`}>{blog.title}</Link>
+            <Link
+              className="text-blue-500 hover:underline"
+              href={`/blogs/${blog.id}`}
+            >
+              {blog.title}
+            </Link>
           </li>
         ))}
       </ul>

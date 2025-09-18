@@ -1,25 +1,14 @@
 import Link from "next/link";
 
 export default function Home() {
-
   return (
-    <div>
-      <h1>Welcome to Next.js!</h1>
-      <Link className="text-3xl font-bold underline" href="/about">
-        about
-      </Link>
-      <br />
-      <Link className="text-3xl font-bold underline" href="/blogs">
-        blogs
-      </Link>
-      <br />
-      <Link className="text-3xl font-bold underline" href="/services">
-        services
-      </Link>
-      <br />
-      <Link className="text-3xl font-bold underline" href="/contact">
-        contact
-      </Link>
+    <div className="p-10">
+      <h1 className="text-3xl font-bold">Home Page</h1>
+      <div className="mt-5 text-lg">
+        Welcome to our website! We are delighted to have you here. Explore our
+        services, read our latest blogs, and feel free to reach out through our
+        contact page. Enjoy your stay!
+      </div>
     </div>
   );
 }
