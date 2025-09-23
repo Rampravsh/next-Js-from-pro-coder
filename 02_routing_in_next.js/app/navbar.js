@@ -1,18 +1,49 @@
-import Link from "next/link";
+import Link from 'next/link';
 
 const navbar = () => {
   return (
-    <div className="flex gap-5 justify-between ">
-      <h1 className="text-3xl font-bold">
-        <Link href="/">Next.js</Link>
-      </h1>
-      <div className="flex gap-5 text-lg">
-        <Link href="/about">about</Link>
-        <Link href="/blogs">blogs</Link>
-        <Link href="/services">services</Link>
-        <Link href="/contact">contact</Link>
+    <nav style={{ 
+      display: 'flex', 
+      justifyContent: 'space-around', 
+      alignItems: 'center', 
+      padding: '1rem', 
+      backgroundColor: 'ff5733' 
+    }}>
+      <div style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 'bold' }}>
+        <Link href="/">
+          MySite
+        </Link>
       </div>
-    </div>
+      <ul style={{ 
+        display: 'flex', 
+        listStyle: 'none', 
+        gap: '2rem', 
+        margin: 0, 
+        padding: 0 
+      }}>
+        <li style={{ color: '#fff', cursor: 'pointer' }}>
+          <Link href="/about">
+            About
+          </Link>
+        </li>
+        <li style={{ color: '#fff', cursor: 'pointer' }}>
+          <Link href="/services">
+            Services
+          </Link>
+        </li>
+        <li style={{ color: '#fff', cursor: 'pointer' }}>
+          <Link href="/contact">
+            Contact
+          </Link>
+        </li>
+        <li style={{ color: '#fff', cursor: 'pointer' }}>
+          <Link href="/blogs">
+            Blog
+          </Link>
+        </li>
+      </ul>
+    </nav>
   );
 };
+
 export default navbar;
