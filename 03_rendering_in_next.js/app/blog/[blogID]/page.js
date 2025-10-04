@@ -1,4 +1,5 @@
 export const dynamicParams = false;
+export const revalidate = 5;
 
 export async function generateStaticParams() {
   const response = await fetch("https://jsonplaceholder.typicode.com/todos");
@@ -19,6 +20,7 @@ export default async function Page({ params }) {
   return (
     <div>
       <h1>Blog Post: {blogID}</h1>
+      <h2>Date:{new Date().toLocaleString()}</h2>
     </div>
   );
 }
